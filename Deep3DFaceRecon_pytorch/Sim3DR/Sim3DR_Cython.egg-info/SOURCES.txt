@@ -1,0 +1,7 @@
+setup.py
+Sim3DR_Cython.egg-info/PKG-INFO
+Sim3DR_Cython.egg-info/SOURCES.txt
+Sim3DR_Cython.egg-info/dependency_links.txt
+Sim3DR_Cython.egg-info/top_level.txt
+lib/rasterize.cpp
+lib/rasterize_kernel.cpp

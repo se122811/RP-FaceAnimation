@@ -1,0 +1,136 @@
+distributed: True
+image_to_tensorboard: True
+snapshot_save_iter: 40000
+snapshot_save_epoch: 20
+snapshot_save_start_iter: 20000
+snapshot_save_start_epoch: 10
+image_save_iter: 100
+max_epoch: 350
+logging_iter: 100
+results_dir: ./eval_results
+
+gen_optimizer:
+    type: adam
+    lr: 0.0001
+    adam_beta1: 0.5
+    adam_beta2: 0.999
+    lr_policy:
+        iteration_mode: True
+        type: step
+        step_size: 300000
+        gamma: 0.2
+
+trainer:
+    type: trainers.face_trainer_gan::FaceTrainer
+    pretrain_warp_iteration: 200000
+    loss_weight:
+      weight_perceptual_warp: 2.5
+      weight_perceptual_final: 4
+    vgg_param_warp:
+      network: vgg19
+      layers: ['relu_1_1', 'relu_2_1', 'relu_3_1', 'relu_4_1', 'relu_5_1']
+      use_style_loss: False
+      num_scales: 4
+    vgg_param_final:
+      network: vgg19
+      layers: ['relu_1_1', 'relu_2_1', 'relu_3_1', 'relu_4_1', 'relu_5_1']
+      use_style_loss: True
+      num_scales: 4      
+      style_to_perceptual: 250
+    init:
+      type: 'normal'
+      gain: 0.02
+
+gen:
+    type: generators.face_model::FaceGenerator
+    param:
+      mapping_net:
+        coeff_nc: 73
+        descriptor_nc: 256
+        layer: 3
+      warpping_net:
+        encoder_layer: 5
+        decoder_layer: 3
+        base_nc: 32
+      editing_net:
+        layer: 3 # layer: 6
+        num_res_blocks: 2
+        base_nc: 64
+      uv_editing_net:
+        layer: 3 # layer: 6
+        num_res_blocks: 2
+        base_nc: 64
+      common:
+        image_nc: 3 # image_nc 6
+        descriptor_nc: 256
+        max_nc: 256
+        use_spect: False
+
+dis_optimizer:
+    type: adam
+    lr: 0.0001
+    adam_beta1: 0.5
+    adam_beta2: 0.999
+    lr_policy:
+        iteration_mode: True
+        type: step
+        step_size: 300000
+        gamma: 0.2
+
+dis: 
+    type: discriminators.face_discriminator::FaceDiscriminator
+    param:
+        img_size: 256
+
+
+
+# Data options.
+data:
+    type: data.vox_dataset::VoxDataset
+    path: ./dataset/vox_lmdb
+    3DMM_path: ./dataset/vox_3dmm_vi
+    #path: ./dataset/vox_lmdb
+    resolution: 256
+    semantic_radius: 13
+    train:
+      batch_size: 5
+      distributed: True
+    val:
+      batch_size: 8
+      distributed: True
+
+# 3DMM
+Deep3DRecon_pytorch:
+    type: Deep3DRecon_pytorch
+    gpu_ids: 0
+    checkpoints_dir: /data/face/PIRender_hs/Deep3DFaceRecon_pytorch/checkpoints
+    vis_batch_nums: 1
+    eval_batch_nums: float('inf')
+    use_ddp: True
+    ddp_port: 12355
+    display_per_batch: True
+    add_image: True
+    world_size: 1 
+    model: facerecon
+    suffix: ''
+    phase: test
+    isTrain: False
+    dataset_mode: None
+    inference_batch_size: 100
+    name: face_recon_pytorch3d
+    epoch: 20 
+    results_dir: ./eval_results
+    input_dir: /data/Deep3DFaceRecon_pytorch/datasets/vox/train
+    keypoint_dir: /data/Deep3DFaceRecon_pytorch/datasets/vox_3DMM/train
+    output_dir: /data/Deep3DFaceRecon_pytorch/result_test
+    net_recon: resnet50
+    init_path: checkpoints/init_model/resnet50-0676ba61.pth
+    use_last_fc: False
+    bfm_folder: BFM
+    bfm_model: BFM_model_front.mat
+    focal: 1015.
+    center: 112.
+    camera_d: 10.
+    z_near: 5.
+    z_far: 15.
+

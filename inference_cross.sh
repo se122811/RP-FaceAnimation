@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 --master_port 12391 inference_cross.py --config ./config/face_demo.yaml --name face_concat_renderface --no_resume --output_dir ./vox_result/face_reenactment_cross --cross_id
